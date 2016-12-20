@@ -5,16 +5,28 @@
 #define ERR_OUT_OF_SENSOR_RANGE 0x04
 
 // Distance units in millimeters
-// Angular distance in degrees/2 (ie 0-180)
+// Angular distance in degrees
 
-#define CMD_MOVE_FORWARD 0x01             // Parameters: Distance; Return: Command,Status
-#define CMD_MOVE_REVERSE 0x02             // Parameters: Distance; Return: Command,Status
-#define CMD_MOVE_CLOCKWIZE 0x03           // Parameters: Angle; Return: Command,Status
-#define CMD_MOVE_COUNTERCLOCKWISE 0x04    // Parameters: Angle; Return: Command, Status
+#define CMD_MOVE_FORWARD 0x01             // Parameters: Distance, Speed; Return: Command,Status
+#define CMD_MOVE_REVERSE 0x02             // Parameters: Distance, Speed; Return: Command,Status
+#define CMD_MOVE_CLOCKWISE 0x03           // Parameters: Angle, Speed; Return: Command,Status
+#define CMD_MOVE_COUNTERCLOCKWISE 0x04    // Parameters: Angle, Speed; Return: Command, Status
 #define CMD_READ_BEARING 0x05             // Parameters: None; Return: Command, Bearing
-#define CMD_READ_RANGE 0x06
+#define CMD_READ_RANGE 0x06               // Parameters: None; Return: Command, Range
+#define CMD_READ_VOLTS 0x07               // Parameters: None; Return: Command, Volts
+#define CMD_READ_TEMPATURE 0x08           // Parameters: None; Return: Command, Tempature
+#define CMD_TEST 0x09                     // Parameters: Command; Return: Command, ErrorCode
 
-// CMD_READ_VOLTS
-// CMD_READ_TEMPERATURE
-// CMD_TEST
+/* Internal Reading */
+byte cmd_read_volts();
+byte cmd_read_tempature();
+byte cmd_test(byte command); 
 
+
+/* Movement and Heading Commands, Transport */
+byte cmd_move_forward(byte distance, byte movspeed);
+byte cmd_move_reverse(byte distance, byte movspeed);
+byte cmd_move_clockwise(byte angle, byte movspeed);
+byte cmd_move_counterclockwise(byte angle, byte movspeed);
+byte cmd_read_bearing(byte* bearing);
+byte cmd_read_range(byte* range);
