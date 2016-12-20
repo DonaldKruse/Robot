@@ -77,17 +77,17 @@ byte get_range(unsigned int *distance)
 /*     Description: Commands the drive motors to execute moves at commanded speed */
 /*                  and duration.                                                 */
 /**********************************************************************************/
-byte move_forward(unsigned int move_time, unsigned int speed) {
+byte move_forward(unsigned int move_time, unsigned int movspeed) {
 
-  if (speed > 250) speed = 250;
+  if (movspeed > 250) movspeed = 250;
   
   digitalWrite(FORWARD_STARBOARD_DRIVE, HIGH);
   digitalWrite(REVERSE_STARBOARD_DRIVE, LOW);
-  analogWrite(PWM_STARBOARD_DRIVE, speed);
+  analogWrite(PWM_STARBOARD_DRIVE, movspeed);
 
   digitalWrite(FORWARD_PORT_DRIVE, HIGH);
   digitalWrite(REVERSE_PORT_DRIVE, LOW);
-  analogWrite(PWM_PORT_DRIVE, speed);  
+  analogWrite(PWM_PORT_DRIVE, movspeed);  
 
   delay(move_time);
 
@@ -95,18 +95,18 @@ byte move_forward(unsigned int move_time, unsigned int speed) {
   analogWrite(PWM_PORT_DRIVE, 0);  
 }
 
-byte move_reverse(unsigned int move_time, unsigned int speed) {
+byte move_reverse(unsigned int move_time, unsigned int movspeed) {
 
-  if (speed > 250) speed = 250;
+  if (movspeed > 250) movspeed = 250;
 
  
   digitalWrite(FORWARD_STARBOARD_DRIVE, LOW);
   digitalWrite(REVERSE_STARBOARD_DRIVE, HIGH);
-  analogWrite(PWM_STARBOARD_DRIVE, speed);
+  analogWrite(PWM_STARBOARD_DRIVE, movspeed);
   
   digitalWrite(FORWARD_PORT_DRIVE, LOW);
   digitalWrite(REVERSE_PORT_DRIVE, HIGH);
-  analogWrite(PWM_PORT_DRIVE, speed);  
+  analogWrite(PWM_PORT_DRIVE, movspeed);  
   delay(move_time);
 
   analogWrite(PWM_STARBOARD_DRIVE, 0);
@@ -137,22 +137,22 @@ byte move_reverse(unsigned int move_time, unsigned int speed) {
 //}
 
 
-byte turn_left(float heading, unsigned int speed) {
+byte turn_left(float heading, unsigned int movspeed) {
   
   float bearing;
   int counter;
 
-  if (speed > 250) speed = 250;
+  if (movspeed > 250) movspeed = 250;
 
   get_bearing(&bearing);
   
   digitalWrite(FORWARD_STARBOARD_DRIVE, HIGH);
   digitalWrite(REVERSE_STARBOARD_DRIVE, LOW);
-  analogWrite(PWM_STARBOARD_DRIVE, speed);
+  analogWrite(PWM_STARBOARD_DRIVE, movspeed);
 
   digitalWrite(FORWARD_PORT_DRIVE, LOW);
   digitalWrite(REVERSE_PORT_DRIVE, HIGH);
-  analogWrite(PWM_PORT_DRIVE, speed);  
+  analogWrite(PWM_PORT_DRIVE, movspeed);  
   counter = 0;
   while ((abs(bearing-heading) > 10) && (counter < 10)) { 
     get_bearing(&bearing); 
