@@ -4,11 +4,14 @@
 #define ERR_UNKNOWN_FAILURE 0x03
 #define ERR_OUT_OF_SENSOR_RANGE 0x04
 
-#define CMD_MOVE_FORWARD 0x01
-#define CMD_MOVE_REVERSE 0x02
-#define CMD_MOVE_CLOCKWIZE 0x03
-#define CMD_MOVE_COUNTERCLOCKWISE 0x04
-#define CMD_READ_HEADING 0x05
+// Distance units in millimeters
+// Angular distance in degrees/2 (ie 0-180)
+
+#define CMD_MOVE_FORWARD 0x01             // Parameters: Distance; Return: Command,Status
+#define CMD_MOVE_REVERSE 0x02             // Parameters: Distance; Return: Command,Status
+#define CMD_MOVE_CLOCKWIZE 0x03           // Parameters: Angle; Return: Command,Status
+#define CMD_MOVE_COUNTERCLOCKWISE 0x04    // Parameters: Angle; Return: Command, Status
+#define CMD_READ_BEARING 0x05             // Parameters: None; Return: Command, Bearing
 #define CMD_READ_RANGE 0x06
 
 // CMD_READ_VOLTS
