@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 #define ERR_SUCCESS 0x0000
 #define ERR_ILLEGAL_COMMAND 0x01
 #define ERR_ILLEGAL_PARAMETER 0x02
@@ -24,9 +26,9 @@ byte cmd_test(byte command);
 
 
 /* Movement and Heading Commands, Transport */
-byte cmd_move_forward(byte distance, byte movspeed);
-byte cmd_move_reverse(byte distance, byte movspeed);
-byte cmd_move_clockwise(byte angle, byte movspeed);
-byte cmd_move_counterclockwise(byte angle, byte movspeed);
-byte cmd_read_bearing(byte* bearing);
-byte cmd_read_range(byte* range);
+byte cmd_move_forward(unsigned int distance, unsigned int movspeed);
+byte cmd_move_reverse(unsigned int distance, unsigned int movspeed);
+byte cmd_move_clockwise(unsigned int angle, unsigned int  movspeed);
+byte cmd_move_counterclockwise(unsigned int angle, unsigned int movspeed);
+byte cmd_read_bearing(unsigned* bearing);
+byte cmd_read_range(unsigned* range);

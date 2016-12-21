@@ -1,4 +1,6 @@
+
 #include "Robot_Control_Interface.h"
+#include "Hardware.h"
 
 /* Internal Reading */
 //TODO--Define these functions.
@@ -18,7 +20,7 @@
  * 
  * returns error code
  */
-byte cmd_move_forward(byte distance, byte movmovspeed) {
+byte cmd_move_forward(unsigned int distance, unsigned int movspeed) {
   
   if (movspeed > 250) movspeed = 250;
   
@@ -30,7 +32,10 @@ byte cmd_move_forward(byte distance, byte movmovspeed) {
   digitalWrite(REVERSE_PORT_DRIVE, LOW);
   analogWrite(PWM_PORT_DRIVE, movspeed);  
 
-  delay(move_time);
+
+  // TODO - compute move_time from distance. For now use default time of 100 ms
+  //delay(move_time);
+  delay(100);
 
   analogWrite(PWM_STARBOARD_DRIVE, 0);
   analogWrite(PWM_PORT_DRIVE, 0);  
@@ -56,7 +61,9 @@ byte cmd_move_reverse(byte distance, byte movspeed) {
   digitalWrite(FORWARD_PORT_DRIVE, LOW);
   digitalWrite(REVERSE_PORT_DRIVE, HIGH);
   analogWrite(PWM_PORT_DRIVE, movspeed);  
-  delay(move_time);
+  // TODO - compute move_time from distance. For now use default time of 100 ms
+  //delay(move_time);
+  delay(100);
 
   analogWrite(PWM_STARBOARD_DRIVE, 0);
   analogWrite(PWM_PORT_DRIVE, 0); 
@@ -64,7 +71,7 @@ byte cmd_move_reverse(byte distance, byte movspeed) {
   return ERR_SUCCESS; //TODO--Consider surrounding with try-catch 
 }
 
-byte cmd_move_clockwise(byte angle, byte movspeed);
+byte cmd_move_clockwise(unsigned int angle, unsigned int movspeed);
 
 /**
  * Turns counter-clockwise
@@ -74,13 +81,13 @@ byte cmd_move_clockwise(byte angle, byte movspeed);
  * 
  * returns error code
  */
-byte cmd_move_counterclockwise(byte angle, byte movspeed) {
-  float bearing;
+byte cmd_move_counterclockwise(unsigned int angle, unsigned int movspeed) {
+  unsigned int bearing;
   int counter;
 
   if (movspeed > 250) movspeed = 250;
 
-  get_bearing(&bearing);
+  cmd_read_bearing(&bearing);
   
   digitalWrite(FORWARD_STARBOARD_DRIVE, HIGH);
   digitalWrite(REVERSE_STARBOARD_DRIVE, LOW);
@@ -90,8 +97,8 @@ byte cmd_move_counterclockwise(byte angle, byte movspeed) {
   digitalWrite(REVERSE_PORT_DRIVE, HIGH);
   analogWrite(PWM_PORT_DRIVE, movspeed);  
   counter = 0;
-  while ((abs(bearing-heading) > 10) && (counter < 10)) { 
-    get_bearing(&bearing); 
+  while ((abs(bearing-angle) > 10) && (counter < 10)) { 
+    cmd_read_bearing(&bearing); 
     delay(10);
     counter++;
   }
@@ -109,16 +116,18 @@ byte cmd_move_counterclockwise(byte angle, byte movspeed) {
  * 
  * returns error code
  */
-byte cmd_read_bearing(byte* bearing) {
+byte cmd_read_bearing(unsigned int* bearing) {
   /***** TODO - Rewrite to use only integer math with lookup table for atan2 *****/
 
+  float flt_bearing;
+  
   /* Read bearing from HMC5883L */
     /* Get a new sensor event */ 
   sensors_event_t event; 
   mag.getEvent(&event);
 
   // Calculate bearing when the magnetometer is level, then correct for signs of axis.
-  *bearing = atan2(event.magnetic.y, event.magnetic.x);
+  flt_bearing = atan2(event.magnetic.y, event.magnetic.x);
   
 // TODO - commented out.  This is not useful without calibrating the sensor.
 //  float declinationAngle = 0.15; // ABQ declination in radians.
@@ -134,7 +143,9 @@ byte cmd_read_bearing(byte* bearing) {
 
  
   // Convert radians to degrees for readability.
-  *bearing = *bearing * 180/M_PI; 
+  flt_bearing = flt_bearing * 180/M_PI; 
+  *bearing = round(flt_bearing);
+  
 
   return ERR_SUCCESS; //TODO--consider try-catch
 }
@@ -146,15 +157,18 @@ byte cmd_read_bearing(byte* bearing) {
  * 
  * returns error code
  */
-byte cmd_read_range(byte* range) {
+byte cmd_read_range(unsigned int* range) {
   
   /* HY-SRF05 */
   unsigned int echoTime;
+  unsigned int distance;
   delay(50);
 
   echoTime = sonar.ping_median(ITERATIONS);
-  *distance = sonar.convert_cm(echoTime);
-  *distance *= 10; //convert to mm
+  distance = sonar.convert_cm(echoTime);
+  distance *= 10; //convert to mm
+
+  *range = distance;
   
   if (distance > 0) {
     return ERR_SUCCESS;
