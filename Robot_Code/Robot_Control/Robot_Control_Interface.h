@@ -24,6 +24,8 @@ byte cmd_read_volts();
 byte cmd_read_tempature();
 byte cmd_test(byte command); 
 
+/* Function to initialize data structures, actuators, and sensors.  Call once. */
+byte hardware_init();
 
 /* Movement and Heading Commands, Transport */
 byte cmd_move_forward(unsigned int distance, unsigned int movspeed);

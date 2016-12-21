@@ -2,12 +2,40 @@
 #include "Robot_Control_Interface.h"
 #include "Hardware.h"
 
+NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
+
+/* Assign a unique ID to the magnitometer  */
+Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345);
+
 /* Internal Reading */
 //TODO--Define these functions.
 //byte cmd_read_volts()
 //byte cmd_read_tempature();
 //byte cmd_test(byte command); 
 
+byte hardware_init()
+{
+    /*******************************/
+  /*  HMC5883L Setup             */
+  /*******************************/  
+    /* Initialise the sensor */
+  if(!mag.begin())
+  {
+    /* There was a problem detecting the HMC5883 ... check your connections */
+    Serial.println("Ooops, no HMC5883 detected ... Check your wiring!");
+    while(1);
+  }
+
+  /*******************************/
+  /* Initialize Drive Motors     */
+  /*******************************/
+  pinMode(PWM_STARBOARD_DRIVE, OUTPUT);
+  pinMode(FORWARD_STARBOARD_DRIVE, OUTPUT);
+  pinMode(REVERSE_STARBOARD_DRIVE, OUTPUT);
+  pinMode(PWM_PORT_DRIVE, OUTPUT);
+  pinMode(FORWARD_PORT_DRIVE, OUTPUT);
+  pinMode(REVERSE_PORT_DRIVE, OUTPUT);
+}
 
 /* Movement and Heading Commands, Transport */
 
