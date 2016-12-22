@@ -13,6 +13,15 @@ Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345);
 //byte cmd_read_tempature();
 //byte cmd_test(byte command); 
 
+
+struct compass_cal_struct {
+  float max_x;
+  float min_x;
+  float max_y;
+  float min_y;
+};
+compass_cal_struct compass_cal = {0,0,0,0};
+
 byte hardware_init()
 {
     /*******************************/
@@ -204,4 +213,37 @@ byte cmd_read_range(unsigned int* range) {
     return ERR_OUT_OF_SENSOR_RANGE;
   }
 }
+
+/**
+ * Detects min and max for x & y components of magnetic field vector and stores them in memory.
+ * 
+ * returns error code
+ */
+byte cmd_calibrate_compass() {
+
+  /*  Current version is meant to be called repeatedly while robot is rotated manually. */
+  /*    Steps to use:                                                                   */
+  /*     1) Add command to main loop to call this routine and then serial print max
+   *      values.
+   *     2) Set dafaut values of compass_cal to {0,0,0,0}
+   *     3) Rotate robot several times while recording max values in serial monitor.  
+   *     4) Update default values for compass_cal.
+   */
+
+  /* TODO -- Update routine to allow robot to auto-calibrate.  Move compass_cal to 
+   *  non-volatile memory.
+   */
+    /* Read bearing from HMC5883L */
+    /* Get a new sensor event */ 
+  sensors_event_t event; 
+  mag.getEvent(&event);
+
+  if (event.magnetic.x < compass_cal.min_x) compass_cal.min_x = event.magnetic.x;
+  if (event.magnetic.y < compass_cal.min_y) compass_cal.min_y = event.magnetic.y;
+  if (event.magnetic.x > compass_cal.max_x) compass_cal.max_y = event.magnetic.x;
+  if (event.magnetic.y > compass_cal.max_y) compass_cal.max_y = event.magnetic.y;
+  
+  return ERR_SUCCESS;
+}
+
 
