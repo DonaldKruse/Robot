@@ -14,6 +14,8 @@ Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345);
 //byte cmd_test(byte command); 
 
 compass_cal_struct compass_cal = {35.73, -17.64, 55.64, 2.55};  // Hardcoded values for Prototype A.
+float port_motor_cal = 1.0;
+float starboard_motor_cal = 1.25;
 
 byte hardware_init()
 {
@@ -89,22 +91,25 @@ ISR(TIMER1_COMPA_vect) {
  * 
  * returns error code
  */
-byte cmd_move_forward(unsigned int distance, unsigned int movspeed) {
-  
-  if (movspeed > 250) movspeed = 250;
+byte cmd_move_forward(unsigned int distance, unsigned int movespeed) {
+
+  int port_movespeed = round(movespeed * port_motor_cal);
+  if (port_movespeed > 250) port_movespeed = 250;
+
+  int starboard_movespeed = round(movespeed * starboard_motor_cal);
+  if (starboard_movespeed > 250) port_movespeed = 250;
+
   
   digitalWrite(FORWARD_STARBOARD_DRIVE, HIGH);
   digitalWrite(REVERSE_STARBOARD_DRIVE, LOW);
-  analogWrite(PWM_STARBOARD_DRIVE, movspeed);
+  analogWrite(PWM_STARBOARD_DRIVE, starboard_movespeed);
 
   digitalWrite(FORWARD_PORT_DRIVE, HIGH);
   digitalWrite(REVERSE_PORT_DRIVE, LOW);
-  analogWrite(PWM_PORT_DRIVE, movspeed);  
+  analogWrite(PWM_PORT_DRIVE, port_movespeed);  
 
-
-  // TODO - compute move_time from distance. For now use default time of 100 ms
-  //delay(move_time);
-  delay(100);
+  // For now assume that robot moves 1 mm / mS.
+  delay(distance);
 
   analogWrite(PWM_STARBOARD_DRIVE, 0);
   analogWrite(PWM_PORT_DRIVE, 0);  
@@ -119,20 +124,25 @@ byte cmd_move_forward(unsigned int distance, unsigned int movspeed) {
  * 
  * returns error code
  */
-byte cmd_move_reverse(byte distance, byte movspeed) {
-  if (movspeed > 250) movspeed = 250;
+byte cmd_move_reverse(byte distance, byte movespeed) {
+  
+  int port_movespeed = round(movespeed * port_motor_cal);
+  if (port_movespeed > 250) port_movespeed = 250;
+
+  int starboard_movespeed = round(movespeed * starboard_motor_cal);
+  if (starboard_movespeed > 250) port_movespeed = 250;
 
  
   digitalWrite(FORWARD_STARBOARD_DRIVE, LOW);
   digitalWrite(REVERSE_STARBOARD_DRIVE, HIGH);
-  analogWrite(PWM_STARBOARD_DRIVE, movspeed);
+  analogWrite(PWM_STARBOARD_DRIVE, starboard_movespeed);
   
   digitalWrite(FORWARD_PORT_DRIVE, LOW);
   digitalWrite(REVERSE_PORT_DRIVE, HIGH);
-  analogWrite(PWM_PORT_DRIVE, movspeed);  
-  // TODO - compute move_time from distance. For now use default time of 100 ms
-  //delay(move_time);
-  delay(100);
+  analogWrite(PWM_PORT_DRIVE, port_movespeed);  
+  
+  // For now, assumce that movement is 1 mm / mS.
+  delay(distance);
 
   analogWrite(PWM_STARBOARD_DRIVE, 0);
   analogWrite(PWM_PORT_DRIVE, 0); 
