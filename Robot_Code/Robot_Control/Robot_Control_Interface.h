@@ -18,6 +18,7 @@
 #define CMD_READ_VOLTS 0x07               // Parameters: None; Return: Command, Volts
 #define CMD_READ_TEMPATURE 0x08           // Parameters: None; Return: Command, Tempature
 #define CMD_TEST 0x09                     // Parameters: Command; Return: Command, ErrorCode
+#define CMD_CALIBRATE_COMPASS             // Parameters: None; Return: Command, ErrorCode
 
 /* Internal Reading */
 byte cmd_read_volts();
@@ -34,3 +35,14 @@ byte cmd_move_clockwise(unsigned int angle, unsigned int  movspeed);
 byte cmd_move_counterclockwise(unsigned int angle, unsigned int movspeed);
 byte cmd_read_bearing(unsigned* bearing);
 byte cmd_read_range(unsigned* range);
+byte cmd_calibrate_compass();
+
+/* Types and Routines for internal use only. */
+struct compass_cal_struct {
+  double max_x;
+  double min_x;
+  double max_y;
+  double min_y;
+};
+compass_cal_struct* get_compass_cal();
+

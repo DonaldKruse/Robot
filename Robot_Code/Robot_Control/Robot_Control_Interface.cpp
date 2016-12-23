@@ -13,6 +13,8 @@ Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345);
 //byte cmd_read_tempature();
 //byte cmd_test(byte command); 
 
+compass_cal_struct compass_cal = {35.73, -17.64, 55.64, 2.55};  // Hardcoded values for Prototype A.
+
 byte hardware_init()
 {
     /*******************************/
@@ -155,23 +157,29 @@ byte cmd_read_bearing(unsigned int* bearing) {
   mag.getEvent(&event);
 
   // Calculate bearing when the magnetometer is level, then correct for signs of axis.
-  flt_bearing = atan2(event.magnetic.y, event.magnetic.x);
+
+  /* Correct the vector for the previously measured zero point (calibration)
+   *  then calculate the bearing.
+   */
+  flt_bearing = atan2(event.magnetic.y - (compass_cal.max_y - compass_cal.min_y)/2, 
+                      event.magnetic.x - (compass_cal.max_x - compass_cal.min_x)/2);
   
-// TODO - commented out.  This is not useful without calibrating the sensor.
-//  float declinationAngle = 0.15; // ABQ declination in radians.
-//  *bearing += declinationAngle;
-//  
-//  // Correct for when signs are reversed.
-//  if(*bearing < 0)
-//    *bearing += 2*PI;
-//    
-//  // Check for wrap due to addition of declination.
-//  if(*bearing > 2*PI)
-//    *bearing -= 2*PI;
+  float declinationAngle = 0.15; // ABQ declination in radians.
+  *bearing += declinationAngle;
+  
+  // Correct for when signs are reversed.
+  if(*bearing < 0)
+    *bearing += 2*PI;
+    
+  // Check for wrap due to addition of declination.
+  if(*bearing > 2*PI)
+    *bearing -= 2*PI;
 
  
-  // Convert radians to degrees for readability.
+  // Convert radians to unsigned degrees.
   flt_bearing = flt_bearing * 180/M_PI; 
+  if (flt_bearing < 0) flt_bearing += 360;
+
   *bearing = round(flt_bearing);
   
 
@@ -204,4 +212,59 @@ byte cmd_read_range(unsigned int* range) {
     return ERR_OUT_OF_SENSOR_RANGE;
   }
 }
+
+/**
+ * Detects min and max for x & y components of magnetic field vector and stores them in memory.
+ * 
+ * returns error code
+ */
+byte cmd_calibrate_compass() {
+
+  /*  Current version is meant to be called repeatedly while robot is rotated manually. */
+  /*    Steps to use:                                                                   */
+  /*     1) Add commands (see below)  to main loop to call this routine and then serial print max/min
+   *      values.
+   *     2) Set dafaut values of compass_cal to {1000,-1000,1000,-1000}
+   *     3) Rotate robot several times while recording max values in serial monitor.  
+   *     4) Update default values for compass_cal.
+   *     
+   *       // Code for main loop
+   *       compass_cal_struct* compass_cal_pntr;
+   *       cmd_calibrate_compass();
+   *       compass_cal_pntr = get_compass_cal();
+   *       Serial.print("X_max: ");  
+   *       Serial.print(compass_cal_pntr->max_x); 
+   *       Serial.print(", X_min: ");
+   *       Serial.print(compass_cal_pntr->min_x);
+   *       Serial.print("; Y_max: ");
+   *       Serial.print(compass_cal_pntr->max_y);
+   *       Serial.print(", Y_min: ");
+   *       Serial.println(compass_cal_pntr->min_y);
+   *       delay(500);
+   */
+
+  /* TODO -- Update routine to allow robot to auto-calibrate.  Move compass_cal to 
+   *  non-volatile memory.
+   */
+    /* Read bearing from HMC5883L */
+    /* Get a new sensor event */ 
+  sensors_event_t event; 
+  mag.getEvent(&event);
+
+  if (event.magnetic.x < compass_cal.min_x) compass_cal.min_x = event.magnetic.x;
+  if (event.magnetic.y < compass_cal.min_y) compass_cal.min_y = event.magnetic.y;
+  if (event.magnetic.x > compass_cal.max_x) compass_cal.max_x = event.magnetic.x;
+  if (event.magnetic.y > compass_cal.max_y) compass_cal.max_y = event.magnetic.y;
+  
+  return ERR_SUCCESS;
+}
+
+/**
+ * get the current compass calibration values
+ * 
+ * returns a pointer to the calibration struct
+ */
+ compass_cal_struct* get_compass_cal()  {
+   return &compass_cal;
+ }
 
