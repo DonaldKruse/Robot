@@ -29,10 +29,10 @@ byte cmd_test(byte command);
 byte hardware_init();
 
 /* Movement and Heading Commands, Transport */
-byte cmd_move_forward(unsigned int distance, unsigned int movspeed);
-byte cmd_move_reverse(unsigned int distance, unsigned int movspeed);
-byte cmd_move_clockwise(unsigned int angle, unsigned int  movspeed);
-byte cmd_move_counterclockwise(unsigned int angle, unsigned int movspeed);
+byte cmd_move_forward(unsigned int distance);
+byte cmd_move_reverse(unsigned int distance);
+byte cmd_move_clockwise(unsigned int angle);
+byte cmd_move_counterclockwise(unsigned int angle);
 byte cmd_read_bearing(unsigned* bearing);
 byte cmd_read_range(unsigned* range);
 byte cmd_calibrate_compass();
